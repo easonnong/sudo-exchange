@@ -1,4 +1,4 @@
-const { network } = require("hardhat")
+const { network, ethers } = require("hardhat")
 const { developmentChains, VERIFICATION_BLOCK_CONFIRMATIONS } = require("../helper-hardhat-config")
 const { verify } = require("../utils/verify")
 
@@ -9,7 +9,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     ? 1
     : VERIFICATION_BLOCK_CONFIRMATIONS
 
-  const arguments = ["Bitcoin", "BTC", "21000000"]
+  const arguments = ["Bitcoin", "BTC", ethers.utils.parseEther("21000000")]
   const token = await deploy("Token", {
     from: deployer,
     args: arguments,

@@ -33,5 +33,23 @@ const { developmentChains } = require("../../helper-hardhat-config")
             assert.equal(reserve.toString(), "100")
           })
         })
+        describe("getEthAmount", function () {
+          it("get eth amount successfully", async () => {
+            let { exchange, token } = await loadFixture(deployContractLockFixture)
+            await token.approve(exchange.address, "100")
+            await exchange.addLiquidity("100", { value: "100" })
+            let ethBalance = await exchange.getEthAmount("100")
+            assert.equal(ethBalance.toString(), "50")
+          })
+        })
+        describe("getAmount", function () {
+          it("get token amount successfully", async () => {
+            let { exchange, token } = await loadFixture(deployContractLockFixture)
+            await token.approve(exchange.address, "100")
+            await exchange.addLiquidity("100", { value: "100" })
+            let tokenBalance = await exchange.getTokenAmount("100")
+            assert.equal(tokenBalance.toString(), "50")
+          })
+        })
       })
     })
