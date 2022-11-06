@@ -1,4 +1,4 @@
-const { network } = require("hardhat")
+const { network, ethers } = require("hardhat")
 const { developmentChains, VERIFICATION_BLOCK_CONFIRMATIONS } = require("../helper-hardhat-config")
 const { verify } = require("../utils/verify")
 
@@ -9,11 +9,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     ? 1
     : VERIFICATION_BLOCK_CONFIRMATIONS
 
-  const token = await deployments.get("Token")
-  tokenAddr = token.address
-
-  const arguments = [tokenAddr]
-  const exchange = await deploy("Exchange", {
+  const arguments = []
+  const testUniswapV2 = await deploy("TestUniswapV2", {
     from: deployer,
     args: arguments,
     log: true,
@@ -23,8 +20,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   // Verify the deployment
   if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
     log("Verifying...")
-    await verify(exchange.address, arguments)
+    await verify(testUniswapV2.address, arguments)
   }
 }
 
-module.exports.tags = ["all", "exchange"]
+module.exports.tags = ["all", "testUniswapV2"]
