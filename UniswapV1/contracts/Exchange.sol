@@ -12,6 +12,9 @@ contract Exchange is ERC20 {
     tokenAddr = _tokenAddr;
   }
 
+  //*******************
+  // Liquidity Function
+  //*******************
   function addLiquidity(uint256 _amount) public payable returns (uint256) {
     if (getReserve() == 0) {
       IERC20 token = IERC20(tokenAddr);
@@ -32,6 +35,19 @@ contract Exchange is ERC20 {
       _mint(msg.sender, liquidity);
       return liquidity;
     }
+  }
+
+  function removeLiquidity(uint256 _amount) public returns (uint256, uint256) {
+    require(_amount > 0, "Invalid amount");
+    uint256 ethAmount = (address(this).balance * _amount) / totalSupply();
+    uint256 tokenAmount = (getReserve() * _amount) / totalSupply();
+
+    _burn(msg.sender, _amount);
+
+    payable(msg.sender).transfer(ethAmount);
+    IERC20(tokenAddr).transfer(msg.sender, tokenAmount);
+
+    return (ethAmount, tokenAmount);
   }
 
   //*******************
