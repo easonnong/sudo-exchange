@@ -10,7 +10,7 @@ contract Factory {
     require(_tokenAddress != address(0), "Invalid token address");
     require(tokenToExchange[_tokenAddress] == address(0), "Exchange already exists");
 
-    Exchange exchange = new Exchange(_tokenAddress);
+    Exchange exchange = new Exchange(_tokenAddress, address(this));
     tokenToExchange[_tokenAddress] = address(exchange);
     return address(exchange);
   }
