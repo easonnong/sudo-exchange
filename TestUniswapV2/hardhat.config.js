@@ -25,9 +25,9 @@ const REPORT_GAS = process.env.REPORT_GAS || false
 
 // VPN
 // yarn add undici
-// const { setGlobalDispatcher, ProxyAgent } = require("undici")
-// const proxyAgent = new ProxyAgent("http://127.0.0.1:19180")
-// setGlobalDispatcher(proxyAgent)
+const { setGlobalDispatcher, ProxyAgent } = require("undici")
+const proxyAgent = new ProxyAgent("http://127.0.0.1:19180")
+setGlobalDispatcher(proxyAgent)
 
 module.exports = {
   defaultNetwork: "hardhat",
@@ -102,7 +102,7 @@ module.exports = {
       },
     ],
   },
-  // mocha: {
-  //   timeout: 200000, // 200 seconds max for running tests
-  // },
+  mocha: {
+    timeout: 20000000, // 20000 seconds max for running tests
+  },
 }
