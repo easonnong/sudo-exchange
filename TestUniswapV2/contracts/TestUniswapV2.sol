@@ -46,11 +46,11 @@ contract TestUniswapV2 {
   ) external view returns (uint256) {
     address[] memory path;
     if (_tokenIn == WETH || _tokenOut == WETH) {
-      path = new path[](2);
+      path = new address[](2);
       path[0] = _tokenIn;
       path[1] = _tokenOut;
     } else {
-      path = new path[](3);
+      path = new address[](3);
       path[0] = _tokenIn;
       path[1] = WETH;
       path[2] = _tokenOut;
