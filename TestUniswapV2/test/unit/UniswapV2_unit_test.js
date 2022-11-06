@@ -19,15 +19,15 @@ const WBTC_ABI = require("../ABI/wbtc_abi.json")
         const provider = ethers.provider
         const deployer = accounts[0]
         const user = accounts[1]
-        console.log(`1`)
+
         await deployments.fixture(["all"])
-        console.log(`1`)
+
         testUniswapV2Contract = await ethers.getContract("TestUniswapV2")
-        console.log(`1`)
+
         testUniswapV2 = testUniswapV2Contract.connect(deployer)
-        console.log(`1`)
+
         const DAIContract = new ethers.Contract(DAI, DAI_ABI, provider)
-        console.log(`2`)
+
         const WbtcContract = new ethers.Contract(WBTC, WBTC_ABI, provider)
         return { testUniswapV2, testUniswapV2Contract, DAIContract, WbtcContract, deployer, user }
       }
