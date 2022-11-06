@@ -4,12 +4,22 @@ pragma solidity ^0.8.7;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
+interface IFactory {
+  function getExchange(address _tokenAddr) external view returns (address);
+}
+
+interface IExchange {
+  function ethToTokenSwap(uint256 _minTokens) external payable;
+}
+
 contract Exchange is ERC20 {
   address public tokenAddr;
+  address public factoryAddr;
 
-  constructor(address _tokenAddr) ERC20("Uniswap V1", "UNI_V1") {
+  constructor(address _tokenAddr, address _factoryAddr) ERC20("Uniswap V1", "UNI_V1") {
     require(_tokenAddr != address(0));
     tokenAddr = _tokenAddr;
+    factoryAddr = _factoryAddr;
   }
 
   //*******************
@@ -66,6 +76,24 @@ contract Exchange is ERC20 {
     require(ethBought >= _minEth, "Insufficient output");
     IERC20(tokenAddr).transferFrom(msg.sender, address(this), _tokenSold);
     payable(msg.sender).transfer(ethBought);
+  }
+
+  function tokenToTokenSwap(
+    uint256 _tokenSold,
+    uint256 _minTokenBought,
+    address _tokenAddr
+  ) public {
+    address exchangeAddr = IFactory(factoryAddr).getExchange(_tokenAddr);
+    require(
+      exchangeAddr != address(this) && exchangeAddr != address(0),
+      "Invalid exchange address"
+    );
+
+    uint256 tokenReserve = getReserve();
+    uint256 ethBought = getAmount(_tokenSold, tokenReserve, address(this).balance);
+    IERC20(tokenAddr).transferFrom(msg.sender, address(this), _tokenSold);
+
+    IExchange(exchangeAddr).ethToTokenSwap{value: ethBought}(_minTokenBought);
   }
 
   //*******************
