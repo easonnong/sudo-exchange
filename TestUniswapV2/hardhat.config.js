@@ -5,6 +5,8 @@ require("hardhat-contract-sizer")
 require("hardhat-deploy")
 require("./tasks")
 require("dotenv").config()
+require("ganache")
+//require("@nomiclabs/hardhat-ganache")
 
 const MAINNET_RPC_URL =
   process.env.MAINNET_RPC_URL ||
@@ -40,12 +42,18 @@ module.exports = {
         httpHeaders: {
           Authorization: `Bearer ${process.env.ETHERSCAN_API_KEY}`,
         },
-        enabled: true,
+        enabled: false,
       },
       chainId: 31337,
     },
     localhost: {
       chainId: 31337,
+    },
+    ganache: {
+      url: "http://127.0.0.1:8545",
+      gasPrice: 30000000000,
+      defaultBalanceEther: 10,
+      chainId: 1337,
     },
     goerli: {
       url: GOERLI_RPC_URL,

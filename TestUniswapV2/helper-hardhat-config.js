@@ -5,6 +5,9 @@ const networkConfig = {
   31337: {
     name: "localhost",
   },
+  1331: {
+    name: "ganache",
+  },
   1: {
     name: "mainnet",
   },
@@ -16,7 +19,7 @@ const networkConfig = {
   },
 }
 
-const developmentChains = ["hardhat", "localhost"]
+const developmentChains = ["hardhat", "localhost", "ganache"]
 const VERIFICATION_BLOCK_CONFIRMATIONS = 6
 
 module.exports = {
