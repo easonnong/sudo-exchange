@@ -14,8 +14,6 @@ const provider = new ethers.providers.JsonRpcProvider()
 !developmentChains.includes(network.name)
   ? describe.skip
   : describe("Uniswap V2 Unit Tests", function () {
-      const Wbtc_Input = ethers.utils.parseEther("10")
-
       // async function deployContractLockFixture() {
       //   let testUniswapV2, testUniswapV2Contract
       //   const accounts = await ethers.getSigners()
@@ -77,30 +75,30 @@ const provider = new ethers.providers.JsonRpcProvider()
 
       describe("swap", function () {
         it("swap wbtc for dai successfully", async () => {
-          //await provider.send("unlockedAccounts", [WBTC_WHALE])
           // create the signer instance
-          const wbtcWhaleSigner = await ethers.getSigner(WBTC_WHALE)
+          //const wbtcWhaleSigner = await ethers.getSigner(WBTC_WHALE)
+          const wbtcWhaleSigner = provider.getSigner(WBTC_WHALE)
           testUniswapV2 = testUniswapV2Contract.connect(wbtcWhaleSigner)
 
           let DeployerDaiBalanceBefore = await DAIContract.balanceOf(deployer.address)
           let DeployerWbtcBalanceBefore = await WbtcContract.balanceOf(deployer.address)
-          console.log(`deployer dai:${DeployerDaiBalanceBefore}`)
-          console.log(`deployer wbtc:${DeployerWbtcBalanceBefore}`)
+          console.log(`deployer dai before:${DeployerDaiBalanceBefore}`)
+          console.log(`deployer wbtc before:${DeployerWbtcBalanceBefore}`)
           let WhaleDaiBalanceBefore = await DAIContract.balanceOf(WBTC_WHALE)
           let WhaleWbtcBalanceBefore = await WbtcContract.balanceOf(WBTC_WHALE)
-          console.log(`whale dai:${WhaleDaiBalanceBefore}`)
-          console.log(`whale wbtc:${WhaleWbtcBalanceBefore}`)
-          await testUniswapV2.swap(WBTC, DAI, Wbtc_Input, 1, deployer.address, {
+          console.log(`whale dai before:${WhaleDaiBalanceBefore}`)
+          console.log(`whale wbtc before:${WhaleWbtcBalanceBefore}`)
+          await testUniswapV2.swap(WBTC, DAI, 100000000, 1, deployer.address, {
             gasLimit: 50000000000,
           })
           let DeployerDaiBalanceAfter = await DAIContract.balanceOf(deployer.address)
           let DeployerWbtcBalanceAfter = await WbtcContract.balanceOf(deployer.address)
-          console.log(`deployer dai:${DeployerDaiBalanceAfter}`)
-          console.log(`deployer wbtc:${DeployerWbtcBalanceAfter}`)
+          console.log(`deployer dai after:${DeployerDaiBalanceAfter}`)
+          console.log(`deployer wbtc after:${DeployerWbtcBalanceAfter}`)
           let WhaleDaiBalanceAfter = await DAIContract.balanceOf(WBTC_WHALE)
           let WhaleWbtcBalanceAfter = await WbtcContract.balanceOf(WBTC_WHALE)
-          console.log(`whale dai:${WhaleDaiBalanceAfter}`)
-          console.log(`whale wbtc:${WhaleWbtcBalanceAfter}`)
+          console.log(`whale dai after:${WhaleDaiBalanceAfter}`)
+          console.log(`whale wbtc after:${WhaleWbtcBalanceAfter}`)
         })
       })
     })
