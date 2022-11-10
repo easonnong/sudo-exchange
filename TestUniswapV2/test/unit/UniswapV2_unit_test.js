@@ -62,17 +62,17 @@ const provider = new ethers.providers.JsonRpcProvider()
       //     console.log(`whale wbtc:${WhaleWbtcBalanceAfter}`)
       //   })
       // })
-
+      let testUniswapV2, testUniswapV2Contract, DAIContract, WbtcContract
+      let deployer, user
       beforeEach(async () => {
-        let testUniswapV2, testUniswapV2Contract
         const accounts = await ethers.getSigners()
-        const deployer = accounts[0]
-        const user = accounts[1]
+        deployer = accounts[0]
+        user = accounts[1]
         await deployments.fixture(["all"])
         testUniswapV2Contract = await ethers.getContract("TestUniswapV2")
         testUniswapV2 = testUniswapV2Contract.connect(deployer)
-        const DAIContract = new ethers.Contract(DAI, DAI_ABI, provider)
-        const WbtcContract = new ethers.Contract(WBTC, WBTC_ABI, provider)
+        DAIContract = new ethers.Contract(DAI, DAI_ABI, provider)
+        WbtcContract = new ethers.Contract(WBTC, WBTC_ABI, provider)
       })
 
       describe("swap", function () {

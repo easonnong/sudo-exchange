@@ -9,6 +9,8 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     ? 1
     : VERIFICATION_BLOCK_CONFIRMATIONS
 
+  console.log(`deployer:${deployer}`)
+
   const arguments = []
   const testUniswapV2 = await deploy("TestUniswapV2", {
     from: deployer,

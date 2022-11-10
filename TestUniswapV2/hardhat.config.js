@@ -17,6 +17,7 @@ const POLYGON_MAINNET_RPC_URL =
 const GOERLI_RPC_URL =
   process.env.GOERLI_RPC_URL || "https://eth-goerli.alchemyapi.io/v2/your-api-key"
 const PRIVATE_KEY = process.env.PRIVATE_KEY
+const Ganache_Deployer_Private_key = process.env.Ganache_Deployer_Private_key
 
 const MNEMONIC = process.env.MNEMONIC || "Your mnemonic"
 const FORKING_BLOCK_NUMBER = process.env.FORKING_BLOCK_NUMBER
@@ -27,9 +28,9 @@ const REPORT_GAS = process.env.REPORT_GAS || false
 
 // VPN
 // yarn add undici
-const { setGlobalDispatcher, ProxyAgent } = require("undici")
-const proxyAgent = new ProxyAgent("http://127.0.0.1:19180")
-setGlobalDispatcher(proxyAgent)
+// const { setGlobalDispatcher, ProxyAgent } = require("undici")
+// const proxyAgent = new ProxyAgent("http://127.0.0.1:19180")
+// setGlobalDispatcher(proxyAgent)
 
 module.exports = {
   defaultNetwork: "hardhat",
@@ -51,8 +52,9 @@ module.exports = {
     },
     ganache: {
       url: "http://127.0.0.1:8545",
-      gasPrice: 30000000000,
-      defaultBalanceEther: 10,
+      //gasPrice: 30000000000,
+      accounts: Ganache_Deployer_Private_key !== undefined ? [Ganache_Deployer_Private_key] : [],
+      saveDeployments: false,
       chainId: 1337,
     },
     goerli: {
