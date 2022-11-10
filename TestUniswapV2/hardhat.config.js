@@ -54,6 +54,7 @@ module.exports = {
       url: "http://127.0.0.1:8545",
       //gasPrice: 30000000000,
       accounts: Ganache_Deployer_Private_key !== undefined ? [Ganache_Deployer_Private_key] : [],
+      //allowUnlimitedContractSize: true,
       saveDeployments: false,
       chainId: 1337,
     },

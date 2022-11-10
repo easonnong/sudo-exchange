@@ -77,7 +77,10 @@ const provider = new ethers.providers.JsonRpcProvider()
 
       describe("swap", function () {
         it("swap wbtc for dai successfully", async () => {
-          testUniswapV2 = testUniswapV2Contract.connect(WBTC_WHALE)
+          //await provider.send("unlockedAccounts", [WBTC_WHALE])
+          // create the signer instance
+          const wbtcWhaleSigner = await ethers.getSigner(WBTC_WHALE)
+          testUniswapV2 = testUniswapV2Contract.connect(wbtcWhaleSigner)
 
           let DeployerDaiBalanceBefore = await DAIContract.balanceOf(deployer.address)
           let DeployerWbtcBalanceBefore = await WbtcContract.balanceOf(deployer.address)
@@ -87,7 +90,9 @@ const provider = new ethers.providers.JsonRpcProvider()
           let WhaleWbtcBalanceBefore = await WbtcContract.balanceOf(WBTC_WHALE)
           console.log(`whale dai:${WhaleDaiBalanceBefore}`)
           console.log(`whale wbtc:${WhaleWbtcBalanceBefore}`)
-          await testUniswapV2.swap(WBTC, DAI, Wbtc_Input, 1, deployer.address)
+          await testUniswapV2.swap(WBTC, DAI, Wbtc_Input, 1, deployer.address, {
+            gasLimit: 50000000000,
+          })
           let DeployerDaiBalanceAfter = await DAIContract.balanceOf(deployer.address)
           let DeployerWbtcBalanceAfter = await WbtcContract.balanceOf(deployer.address)
           console.log(`deployer dai:${DeployerDaiBalanceAfter}`)
