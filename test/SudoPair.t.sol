@@ -541,7 +541,7 @@ contract Flashloaner {
         );
     }
 
-    function zuniswapV2Call(
+    function sudoCall(
         address sender,
         uint256 amount0Out,
         uint256 amount1Out,
