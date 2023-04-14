@@ -33,13 +33,13 @@ contract SudoFactory {
 
         if (pairs[token0][token1] != address(0)) revert PairExists();
 
-        bytes memory bytecode = type(ZuniswapV2Pair).creationCode;
+        bytes memory bytecode = type(SudoPair).creationCode;
         bytes32 salt = keccak256(abi.encodePacked(token0, token1));
         assembly {
             pair := create2(0, add(bytecode, 32), mload(bytecode), salt)
         }
 
-        IZuniswapV2Pair(pair).initialize(token0, token1);
+        ISudoPair(pair).initialize(token0, token1);
 
         pairs[token0][token1] = pair;
         pairs[token1][token0] = pair;
