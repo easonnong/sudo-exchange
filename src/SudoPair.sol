@@ -1,63 +1,137 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.13;
+pragma solidity ^0.8.10;
 
-import "solmate/tokens/ERC20.sol";
-import "./lib/Math.sol";
+import "./interfaces/ISudoFactory.sol";
+import "./interfaces/ISudoPair.sol";
+import {SudoPair} from "./SudoPair.sol";
 
-error InsufficientLiquidityMinted();
+library SudoLibrary {
+    error InsufficientAmount();
+    error InsufficientLiquidity();
+    error InvalidPath();
 
-contract SudoPair is ERC20 {
-    address public token0;
-    address public token1;
-    uint256 public reserve0;
-    uint256 public reserve1;
-
-    uint256 constant MINIMUM_LIQUIDITY = 1000;
-
-    event Mint(address indexed sender, uint256 amount0, uint256 amount1);
-    event Sync(uint256 reserve0, uint256 reserve1);
-
-    constructor(
-        address token0_,
-        address token1_
-    ) ERC20("Sudo Pair", "SUDO", 18) {
-        token0 = token0_;
-        token1 = token1_;
+    function getReserves(
+        address factoryAddress,
+        address tokenA,
+        address tokenB
+    ) public returns (uint256 reserveA, uint256 reserveB) {
+        (address token0, address token1) = sortTokens(tokenA, tokenB);
+        (uint256 reserve0, uint256 reserve1, ) = ISudoPair(
+            pairFor(factoryAddress, token0, token1)
+        ).getReserves();
+        (reserveA, reserveB) = tokenA == token0
+            ? (reserve0, reserve1)
+            : (reserve1, reserve0);
     }
 
-    function mint() public {
-        uint256 balance0 = ERC20(token0).balanceOf(address(this));
-        uint256 balance1 = ERC20(token1).balanceOf(address(this));
-        uint256 amount0 = balance0 - reserve0;
-        uint256 amount1 = balance1 - reserve1;
+    function quote(
+        uint256 amountIn,
+        uint256 reserveIn,
+        uint256 reserveOut
+    ) public pure returns (uint256 amountOut) {
+        if (amountIn == 0) revert InsufficientAmount();
+        if (reserveIn == 0 || reserveOut == 0) revert InsufficientLiquidity();
 
-        uint256 liquidity;
+        return (amountIn * reserveOut) / reserveIn;
+    }
 
-        if (totalSupply == 0) {
-            liquidity = Math.sqrt(amount0 * amount1) - MINIMUM_LIQUIDITY;
-            _mint(address(0), MINIMUM_LIQUIDITY);
-        } else {
-            liquidity = Math.min(
-                (amount0 * totalSupply) / reserve0,
-                (amount1 * totalSupply) / reserve1
+    function sortTokens(
+        address tokenA,
+        address tokenB
+    ) internal pure returns (address token0, address token1) {
+        return tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
+    }
+
+    function pairFor(
+        address factoryAddress,
+        address tokenA,
+        address tokenB
+    ) internal pure returns (address pairAddress) {
+        (address token0, address token1) = sortTokens(tokenA, tokenB);
+        pairAddress = address(
+            uint160(
+                uint256(
+                    keccak256(
+                        abi.encodePacked(
+                            hex"ff",
+                            factoryAddress,
+                            keccak256(abi.encodePacked(token0, token1)),
+                            keccak256(type(SudoPair).creationCode)
+                        )
+                    )
+                )
+            )
+        );
+    }
+
+    function getAmountOut(
+        uint256 amountIn,
+        uint256 reserveIn,
+        uint256 reserveOut
+    ) public pure returns (uint256) {
+        if (amountIn == 0) revert InsufficientAmount();
+        if (reserveIn == 0 || reserveOut == 0) revert InsufficientLiquidity();
+
+        uint256 amountInWithFee = amountIn * 997;
+        uint256 numerator = amountInWithFee * reserveOut;
+        uint256 denominator = (reserveIn * 1000) + amountInWithFee;
+
+        return numerator / denominator;
+    }
+
+    function getAmountsOut(
+        address factory,
+        uint256 amountIn,
+        address[] memory path
+    ) public returns (uint256[] memory) {
+        if (path.length < 2) revert InvalidPath();
+        uint256[] memory amounts = new uint256[](path.length);
+        amounts[0] = amountIn;
+
+        for (uint256 i; i < path.length - 1; i++) {
+            (uint256 reserve0, uint256 reserve1) = getReserves(
+                factory,
+                path[i],
+                path[i + 1]
             );
+            amounts[i + 1] = getAmountOut(amounts[i], reserve0, reserve1);
         }
 
-        if (liquidity <= 0) revert InsufficientLiquidityMinted();
-
-        _mint(msg.sender, liquidity);
-
-        _update(balance0, balance1);
-
-        emit Mint(msg.sender, amount0, amount1);
+        return amounts;
     }
 
-    //  PRIVATE
+    function getAmountIn(
+        uint256 amountOut,
+        uint256 reserveIn,
+        uint256 reserveOut
+    ) public pure returns (uint256) {
+        if (amountOut == 0) revert InsufficientAmount();
+        if (reserveIn == 0 || reserveOut == 0) revert InsufficientLiquidity();
 
-    function _update(uint256 balance0, uint256 balance1) private {
-        reserve0 = balance0;
-        reserve1 = balance1;
+        uint256 numerator = reserveIn * amountOut * 1000;
+        uint256 denominator = (reserveOut - amountOut) * 997;
 
-        emit Sync(reserve0, reserve1);
+        return (numerator / denominator) + 1;
+    }
+
+    function getAmountsIn(
+        address factory,
+        uint256 amountOut,
+        address[] memory path
+    ) public returns (uint256[] memory) {
+        if (path.length < 2) revert InvalidPath();
+        uint256[] memory amounts = new uint256[](path.length);
+        amounts[amounts.length - 1] = amountOut;
+
+        for (uint256 i = path.length - 1; i > 0; i--) {
+            (uint256 reserve0, uint256 reserve1) = getReserves(
+                factory,
+                path[i - 1],
+                path[i]
+            );
+            amounts[i - 1] = getAmountIn(amounts[i], reserve0, reserve1);
+        }
+
+        return amounts;
     }
 }
